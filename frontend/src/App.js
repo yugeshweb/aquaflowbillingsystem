@@ -220,7 +220,7 @@ const WaterBillingSystem = () => {
           <h2 className="section-title">Real-time Billing</h2>
           <div className="billing-display">
             <div className="bill-amount">
-              <span className="currency">$</span>
+              <span className="currency">₹</span>
               <span className="amount">{currentBill.toFixed(2)}</span>
             </div>
             <div className="billing-details">
@@ -230,11 +230,11 @@ const WaterBillingSystem = () => {
               </div>
               <div className="bill-item">
                 <span className="bill-label">Rate</span>
-                <span className="bill-value">${WATER_RATE}/L</span>
+                <span className="bill-value">₹{WATER_RATE}/L</span>
               </div>
               <div className="bill-item">
                 <span className="bill-label">Power Cost</span>
-                <span className="bill-value">${(powerConsumption * POWER_RATE / 60).toFixed(4)}/min</span>
+                <span className="bill-value">₹{(powerConsumption * POWER_RATE / 60).toFixed(4)}/min</span>
               </div>
             </div>
             <button 
