@@ -206,11 +206,11 @@ const WaterBillingSystem = () => {
           <div className="power-stats">
             <div className="power-stat">
               <span className="power-label">Rate</span>
-              <span className="power-value">${POWER_RATE}/kWh</span>
+              <span className="power-value">₹{POWER_RATE}/kWh</span>
             </div>
             <div className="power-stat">
               <span className="power-label">Cost/hr</span>
-              <span className="power-value">${(powerConsumption * POWER_RATE).toFixed(2)}</span>
+              <span className="power-value">₹{(powerConsumption * POWER_RATE).toFixed(2)}</span>
             </div>
           </div>
         </section>
