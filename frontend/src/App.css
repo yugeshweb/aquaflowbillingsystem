@@ -605,11 +605,12 @@ body {
   }
   
   .analytics-section {
-    grid-column: span 1;
+    grid-column: 1 / -1;
   }
   
   .analytics-grid {
     flex-direction: column;
+    gap: 25px;
   }
   
   .footer-content {
