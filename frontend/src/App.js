@@ -12,8 +12,8 @@ const WaterBillingSystem = () => {
 
   // Constants for calculations
   const TANK_CAPACITY = 1000; // liters
-  const WATER_RATE = 0.05; // $/liter
-  const POWER_RATE = 0.12; // $/kWh
+  const WATER_RATE = 3.5; // ₹/liter
+  const POWER_RATE = 8.5; // ₹/kWh
 
   // Simulate real-time data updates
   useEffect(() => {
