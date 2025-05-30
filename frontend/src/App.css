@@ -552,15 +552,21 @@ body {
 
 /* Analytics Section */
 .analytics-section {
-  grid-column: span 2;
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }
 
 .analytics-grid {
   display: flex;
-  justify-content: space-around;
+  justify-content: center;
   align-items: center;
   flex-wrap: wrap;
-  gap: 20px;
+  gap: 30px;
+  max-width: 800px;
+  margin: 0 auto;
 }
 
 /* Footer */
