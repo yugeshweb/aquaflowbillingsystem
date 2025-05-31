@@ -690,13 +690,19 @@ body {
   letter-spacing: 1px;
 }
 
-/* Watering Control */
+/* Watering Control - Centered */
 .watering-section {
-  grid-column: span 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  max-width: 500px;
+  margin: 0 auto;
 }
 
 .watering-control {
   text-align: center;
+  width: 100%;
 }
 
 .control-title {
