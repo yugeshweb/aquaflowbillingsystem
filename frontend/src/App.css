@@ -828,6 +828,11 @@ body {
     gap: 30px;
     align-items: center;
   }
+  
+  .power-display {
+    flex-direction: column;
+    gap: 20px;
+  }
 }
 
 @media (max-width: 768px) {
@@ -836,7 +841,7 @@ body {
   }
   
   .houses-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr !important;
     max-width: 400px;
   }
   
@@ -847,8 +852,13 @@ body {
   }
   
   .controls-container {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr !important;
     gap: 30px;
+  }
+  
+  .power-display {
+    flex-direction: column;
+    gap: 20px;
   }
   
   .watering-control-inline .control-buttons {
