@@ -2,135 +2,259 @@ import React, { useState, useEffect, useCallback } from 'react';
 import './App.css';
 
 const WaterBillingSystem = () => {
-  // Real-time simulated data states
+  // Tank water levels
+  const [undergroundTankLevel, setUndergroundTankLevel] = useState(35);
+  const [overheadTankLevel, setOverheadTankLevel] = useState(65);
+  
+  // Water flow and power
   const [waterFlow, setWaterFlow] = useState(0);
-  const [tankLevel, setTankLevel] = useState(45);
-  const [powerConsumption, setPowerConsumption] = useState(0);
-  const [totalUsage, setTotalUsage] = useState(0);
-  const [currentBill, setCurrentBill] = useState(0);
-  const [isMotorOn, setIsMotorOn] = useState(false);
-
-  // Constants for calculations
-  const TANK_CAPACITY = 1000; // liters
+  const [overallPowerConsumption, setOverallPowerConsumption] = useState(0);
+  const [pumpToUnderground, setPumpToUnderground] = useState(false);
+  const [pumpToOverhead, setPumpToOverhead] = useState(false);
+  
+  // House consumption data
+  const [houseData, setHouseData] = useState({
+    house1: { dailyUsage: 0, monthlyUsage: 180, currentBill: 0, flowRate: 0 },
+    house2: { dailyUsage: 0, monthlyUsage: 220, currentBill: 0, flowRate: 0 },
+    house3: { dailyUsage: 0, monthlyUsage: 195, currentBill: 0, flowRate: 0 },
+    house4: { dailyUsage: 0, monthlyUsage: 160, currentBill: 0, flowRate: 0 }
+  });
+  
+  // System status
+  const [leakageDetected, setLeakageDetected] = useState(false);
+  const [sensorsActive, setSensorsActive] = useState(true);
+  const [wateringMode, setWateringMode] = useState('auto'); // 'on', 'off', 'auto'
+  
+  // Constants
+  const UNDERGROUND_CAPACITY = 5000; // liters
+  const OVERHEAD_CAPACITY = 1500; // liters
   const WATER_RATE = 3.5; // ₹/liter
   const POWER_RATE = 8.5; // ₹/kWh
 
   // Simulate real-time data updates
   useEffect(() => {
     const interval = setInterval(() => {
-      // Simulate water flow (0-50 L/min)
-      const newFlow = Math.random() * 50;
-      setWaterFlow(newFlow);
-
-      // Update tank level based on flow
-      setTankLevel(prev => {
-        const newLevel = Math.min(100, prev + (newFlow / TANK_CAPACITY) * 100 * 0.1);
+      // Update tank levels
+      setUndergroundTankLevel(prev => {
+        let newLevel = prev;
+        if (pumpToUnderground) {
+          newLevel = Math.min(100, prev + Math.random() * 2);
+        }
+        // Water consumption from underground affects level
+        const totalConsumption = Object.values(houseData).reduce((sum, house) => sum + house.flowRate, 0);
+        newLevel = Math.max(0, newLevel - (totalConsumption / UNDERGROUND_CAPACITY) * 100 * 0.1);
         return newLevel;
       });
 
-      // Simulate power consumption when motor is on
-      if (isMotorOn) {
-        setPowerConsumption(2.5 + Math.random() * 1.5); // 2.5-4 kW
-      } else {
-        setPowerConsumption(0.1 + Math.random() * 0.2); // Standby power
-      }
+      setOverheadTankLevel(prev => {
+        let newLevel = prev;
+        if (pumpToOverhead) {
+          newLevel = Math.min(100, prev + Math.random() * 1.5);
+        }
+        // Water flows from overhead to houses
+        newLevel = Math.max(0, newLevel - Math.random() * 0.5);
+        return newLevel;
+      });
 
-      // Update usage and billing
-      setTotalUsage(prev => prev + (newFlow / 60)); // Convert to liters per second
-      setCurrentBill(prev => prev + (newFlow / 60 * WATER_RATE));
+      // Update water flow
+      setWaterFlow(20 + Math.random() * 30);
+
+      // Update house consumption
+      setHouseData(prev => {
+        const newData = { ...prev };
+        Object.keys(newData).forEach(house => {
+          const baseFlow = Math.random() * 15; // Random flow 0-15 L/min
+          const flowRate = wateringMode === 'off' ? 0 : baseFlow;
+          
+          newData[house] = {
+            ...newData[house],
+            flowRate: flowRate,
+            dailyUsage: newData[house].dailyUsage + (flowRate / 60), // Convert to L/second
+            currentBill: newData[house].currentBill + (flowRate / 60 * WATER_RATE)
+          };
+        });
+        return newData;
+      });
+
+      // Update power consumption
+      const totalFlow = Object.values(houseData).reduce((sum, house) => sum + house.flowRate, 0);
+      let powerConsumption = 0.5; // Base consumption
+      if (pumpToUnderground) powerConsumption += 3.5;
+      if (pumpToOverhead) powerConsumption += 2.5;
+      powerConsumption += totalFlow * 0.05; // Additional power for flow
+      setOverallPowerConsumption(powerConsumption);
+
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [isMotorOn]);
+  }, [pumpToUnderground, pumpToOverhead, houseData, wateringMode]);
 
-  // Auto toggle motor based on tank level
+  // Auto pump control
   useEffect(() => {
-    if (tankLevel > 90) {
-      setIsMotorOn(false);
-    } else if (tankLevel < 30) {
-      setIsMotorOn(true);
+    if (undergroundTankLevel < 20) {
+      setPumpToUnderground(true);
+    } else if (undergroundTankLevel > 90) {
+      setPumpToUnderground(false);
     }
-  }, [tankLevel]);
 
-  // Water particles animation component
-  const WaterParticles = () => {
-    const particles = Array.from({ length: 20 }, (_, i) => (
-      <div
-        key={i}
-        className="water-particle"
-        style={{
-          left: `${Math.random() * 100}%`,
-          animationDelay: `${Math.random() * 2}s`,
-          animationDuration: `${2 + Math.random() * 2}s`
-        }}
-      />
-    ));
-    return <div className="water-particles">{particles}</div>;
-  };
+    if (overheadTankLevel < 30 && undergroundTankLevel > 40) {
+      setPumpToOverhead(true);
+    } else if (overheadTankLevel > 85) {
+      setPumpToOverhead(false);
+    }
+  }, [undergroundTankLevel, overheadTankLevel]);
 
-  // Tank component with animated fill
-  const AnimatedTank = () => (
-    <div className="tank-container">
-      <div className="tank-outer">
-        <div className="tank-inner">
+  // Underground Tank Component
+  const UndergroundTank = () => (
+    <div className="tank-container underground">
+      <h3 className="tank-title">Underground Tank</h3>
+      <div className="tank-visual underground-visual">
+        <div className="tank-structure underground-structure">
           <div 
-            className="water-fill"
-            style={{ height: `${tankLevel}%` }}
+            className="water-fill underground-fill"
+            style={{ height: `${undergroundTankLevel}%` }}
           >
             <div className="water-wave"></div>
             <div className="water-wave wave-2"></div>
+            <div className="water-bubbles">
+              {Array.from({ length: 8 }, (_, i) => (
+                <div key={i} className="bubble" style={{
+                  left: `${20 + Math.random() * 60}%`,
+                  animationDelay: `${Math.random() * 3}s`
+                }}></div>
+              ))}
+            </div>
           </div>
-          <div className="tank-level-indicator">
-            <span className="level-text">{tankLevel.toFixed(1)}%</span>
+          <div className="tank-level-display">
+            <span className="level-percentage">{undergroundTankLevel.toFixed(1)}%</span>
+            <span className="level-liters">{(undergroundTankLevel * UNDERGROUND_CAPACITY / 100).toFixed(0)}L</span>
           </div>
         </div>
-        <div className="tank-labels">
-          <div className="tank-label top">FULL</div>
-          <div className="tank-label bottom">EMPTY</div>
+        <div className="tank-info">
+          <div className="tank-stat">
+            <span className="stat-label">Capacity</span>
+            <span className="stat-value">{UNDERGROUND_CAPACITY}L</span>
+          </div>
+          <div className="tank-stat">
+            <span className="stat-label">Status</span>
+            <span className={`stat-value ${pumpToUnderground ? 'filling' : 'stable'}`}>
+              {pumpToUnderground ? 'FILLING' : 'STABLE'}
+            </span>
+          </div>
         </div>
       </div>
     </div>
   );
 
-  // Circular gauge component
-  const CircularGauge = ({ value, max, label, unit, color }) => {
-    const percentage = (value / max) * 100;
-    const strokeDasharray = 2 * Math.PI * 45;
-    const strokeDashoffset = strokeDasharray - (strokeDasharray * percentage) / 100;
-
-    return (
-      <div className="circular-gauge">
-        <svg width="120" height="120">
-          <circle
-            cx="60"
-            cy="60"
-            r="45"
-            fill="none"
-            stroke="rgba(255,255,255,0.1)"
-            strokeWidth="8"
-          />
-          <circle
-            cx="60"
-            cy="60"
-            r="45"
-            fill="none"
-            stroke={color}
-            strokeWidth="8"
-            strokeLinecap="round"
-            strokeDasharray={strokeDasharray}
-            strokeDashoffset={strokeDashoffset}
-            transform="rotate(-90 60 60)"
-            className="gauge-progress"
-          />
-        </svg>
-        <div className="gauge-content">
-          <div className="gauge-value">{value.toFixed(1)}</div>
-          <div className="gauge-unit">{unit}</div>
-          <div className="gauge-label">{label}</div>
+  // Overhead Tank Component
+  const OverheadTank = () => (
+    <div className="tank-container overhead">
+      <h3 className="tank-title">Overhead Tank</h3>
+      <div className="tank-visual overhead-visual">
+        <div className="tank-structure overhead-structure">
+          <div 
+            className="water-fill overhead-fill"
+            style={{ height: `${overheadTankLevel}%` }}
+          >
+            <div className="water-wave"></div>
+            <div className="water-wave wave-2"></div>
+          </div>
+          <div className="tank-level-display">
+            <span className="level-percentage">{overheadTankLevel.toFixed(1)}%</span>
+            <span className="level-liters">{(overheadTankLevel * OVERHEAD_CAPACITY / 100).toFixed(0)}L</span>
+          </div>
+        </div>
+        <div className="tank-info">
+          <div className="tank-stat">
+            <span className="stat-label">Capacity</span>
+            <span className="stat-value">{OVERHEAD_CAPACITY}L</span>
+          </div>
+          <div className="tank-stat">
+            <span className="stat-label">Status</span>
+            <span className={`stat-value ${pumpToOverhead ? 'filling' : 'stable'}`}>
+              {pumpToOverhead ? 'FILLING' : 'STABLE'}
+            </span>
+          </div>
         </div>
       </div>
-    );
-  };
+    </div>
+  );
+
+  // House Consumption Component
+  const HouseConsumption = ({ houseNum, data }) => (
+    <div className="house-panel">
+      <h4 className="house-title">House {houseNum}</h4>
+      <div className="house-stats">
+        <div className="usage-display">
+          <div className="usage-item">
+            <span className="usage-label">Today</span>
+            <span className="usage-value">{data.dailyUsage.toFixed(1)}L</span>
+          </div>
+          <div className="usage-item">
+            <span className="usage-label">Monthly</span>
+            <span className="usage-value">{data.monthlyUsage}L</span>
+          </div>
+          <div className="usage-item">
+            <span className="usage-label">Flow Rate</span>
+            <span className="usage-value">{data.flowRate.toFixed(1)} L/min</span>
+          </div>
+        </div>
+        <div className="billing-display-small">
+          <span className="bill-label">Current Bill</span>
+          <span className="bill-amount-small">₹{data.currentBill.toFixed(2)}</span>
+        </div>
+        <div className="flow-indicator">
+          <div className="flow-bar-small">
+            <div 
+              className="flow-progress-small"
+              style={{ width: `${(data.flowRate / 15) * 100}%` }}
+            ></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  // Status Indicator Component
+  const StatusIndicator = ({ label, status, activeText, inactiveText }) => (
+    <div className="status-indicator-panel">
+      <div className="status-light-container">
+        <div className={`status-light ${status ? 'active' : 'inactive'}`}>
+          <div className="light-glow"></div>
+          <div className="light-pulse"></div>
+        </div>
+        <span className="status-label">{label}</span>
+      </div>
+      <span className="status-text">
+        {status ? activeText : inactiveText}
+      </span>
+    </div>
+  );
+
+  // Watering Control Component
+  const WateringControl = () => (
+    <div className="watering-control">
+      <h4 className="control-title">Watering System</h4>
+      <div className="control-buttons">
+        {['on', 'off', 'auto'].map(mode => (
+          <button
+            key={mode}
+            className={`control-btn ${wateringMode === mode ? 'active' : ''}`}
+            onClick={() => setWateringMode(mode)}
+          >
+            <span className="btn-text">{mode.toUpperCase()}</span>
+            {wateringMode === mode && <div className="btn-glow"></div>}
+          </button>
+        ))}
+      </div>
+      <div className="control-status">
+        <span className="status-label">Current Mode:</span>
+        <span className={`status-value mode-${wateringMode}`}>
+          {wateringMode.toUpperCase()}
+        </span>
+      </div>
+    </div>
+  );
 
   return (
     <div className="app-container">
@@ -144,146 +268,145 @@ const WaterBillingSystem = () => {
       <header className="app-header">
         <h1 className="app-title">
           <span className="title-icon">💧</span>
-          AquaFlow Billing System
+          AquaFlow Management System
           <span className="title-glow"></span>
         </h1>
-        <div className="status-indicator">
-          <div className={`status-dot ${isMotorOn ? 'active' : 'inactive'}`}></div>
-          <span className="status-text">
-            Motor {isMotorOn ? 'ACTIVE' : 'STANDBY'}
-          </span>
-        </div>
       </header>
 
       {/* Main Dashboard */}
-      <main className="dashboard">
-        {/* Tank Section */}
-        <section className="glass-panel tank-section">
-          <h2 className="section-title">Water Tank Status</h2>
-          <AnimatedTank />
-          <div className="tank-stats">
-            <div className="stat-item">
-              <span className="stat-label">Capacity</span>
-              <span className="stat-value">{TANK_CAPACITY}L</span>
-            </div>
-            <div className="stat-item">
-              <span className="stat-label">Current</span>
-              <span className="stat-value">{(tankLevel * TANK_CAPACITY / 100).toFixed(0)}L</span>
-            </div>
+      <main className="dashboard enhanced">
+        {/* Tank Systems */}
+        <section className="glass-panel tank-systems">
+          <h2 className="section-title">Water Tank Systems</h2>
+          <div className="tanks-grid">
+            <UndergroundTank />
+            <OverheadTank />
           </div>
         </section>
 
-        {/* Flow Visualization */}
-        <section className="glass-panel flow-section">
-          <h2 className="section-title">Water Flow</h2>
-          <div className="flow-visual">
-            <WaterParticles />
-            <div className="flow-meter">
-              <div className="flow-value">
-                {waterFlow.toFixed(1)}
-                <span className="flow-unit">L/min</span>
-              </div>
-              <div className="flow-bar">
-                <div 
-                  className="flow-progress"
-                  style={{ width: `${(waterFlow / 50) * 100}%` }}
-                ></div>
-              </div>
+        {/* House Consumption */}
+        <section className="glass-panel houses-section">
+          <h2 className="section-title">House Water Consumption</h2>
+          <div className="houses-grid">
+            {Object.entries(houseData).map(([houseKey, data], index) => (
+              <HouseConsumption 
+                key={houseKey}
+                houseNum={index + 1}
+                data={data}
+              />
+            ))}
+          </div>
+          <div className="houses-summary">
+            <div className="summary-item">
+              <span className="summary-label">Total Daily Usage</span>
+              <span className="summary-value">
+                {Object.values(houseData).reduce((sum, house) => sum + house.dailyUsage, 0).toFixed(1)}L
+              </span>
+            </div>
+            <div className="summary-item">
+              <span className="summary-label">Total Monthly</span>
+              <span className="summary-value">
+                {Object.values(houseData).reduce((sum, house) => sum + house.monthlyUsage, 0)}L
+              </span>
+            </div>
+            <div className="summary-item">
+              <span className="summary-label">Combined Bill</span>
+              <span className="summary-value">
+                ₹{Object.values(houseData).reduce((sum, house) => sum + house.currentBill, 0).toFixed(2)}
+              </span>
             </div>
           </div>
         </section>
 
         {/* Power Consumption */}
-        <section className="glass-panel power-section">
-          <h2 className="section-title">Power Consumption</h2>
-          <CircularGauge 
-            value={powerConsumption}
-            max={5}
-            label="Power"
-            unit="kW"
-            color="#ff6b6b"
-          />
-          <div className="power-stats">
-            <div className="power-stat">
-              <span className="power-label">Rate</span>
-              <span className="power-value">₹{POWER_RATE}/kWh</span>
+        <section className="glass-panel power-section-enhanced">
+          <h2 className="section-title">Overall Power Consumption</h2>
+          <div className="power-display">
+            <div className="power-gauge-large">
+              <svg width="180" height="180">
+                <circle
+                  cx="90"
+                  cy="90"
+                  r="70"
+                  fill="none"
+                  stroke="rgba(255,255,255,0.1)"
+                  strokeWidth="12"
+                />
+                <circle
+                  cx="90"
+                  cy="90"
+                  r="70"
+                  fill="none"
+                  stroke="#ff6b6b"
+                  strokeWidth="12"
+                  strokeLinecap="round"
+                  strokeDasharray={2 * Math.PI * 70}
+                  strokeDashoffset={2 * Math.PI * 70 - (2 * Math.PI * 70 * overallPowerConsumption) / 10}
+                  transform="rotate(-90 90 90)"
+                  className="gauge-progress"
+                />
+              </svg>
+              <div className="gauge-content-large">
+                <div className="gauge-value-large">{overallPowerConsumption.toFixed(1)}</div>
+                <div className="gauge-unit-large">kW</div>
+              </div>
             </div>
-            <div className="power-stat">
-              <span className="power-label">Cost/hr</span>
-              <span className="power-value">₹{(powerConsumption * POWER_RATE).toFixed(2)}</span>
+            <div className="power-breakdown">
+              <div className="power-item">
+                <span className="power-label">Rate</span>
+                <span className="power-value">₹{POWER_RATE}/kWh</span>
+              </div>
+              <div className="power-item">
+                <span className="power-label">Hourly Cost</span>
+                <span className="power-value">₹{(overallPowerConsumption * POWER_RATE).toFixed(2)}</span>
+              </div>
+              <div className="power-item">
+                <span className="power-label">Underground Pump</span>
+                <span className={`power-status ${pumpToUnderground ? 'active' : 'inactive'}`}>
+                  {pumpToUnderground ? 'ACTIVE' : 'OFF'}
+                </span>
+              </div>
+              <div className="power-item">
+                <span className="power-label">Overhead Pump</span>
+                <span className={`power-status ${pumpToOverhead ? 'active' : 'inactive'}`}>
+                  {pumpToOverhead ? 'ACTIVE' : 'OFF'}
+                </span>
+              </div>
             </div>
           </div>
         </section>
 
-        {/* Billing Information */}
-        <section className="glass-panel billing-section">
-          <h2 className="section-title">Real-time Billing</h2>
-          <div className="billing-display">
-            <div className="bill-amount">
-              <span className="currency">₹</span>
-              <span className="amount">{currentBill.toFixed(2)}</span>
-            </div>
-            <div className="billing-details">
-              <div className="bill-item">
-                <span className="bill-label">Water Usage</span>
-                <span className="bill-value">{totalUsage.toFixed(1)} L</span>
-              </div>
-              <div className="bill-item">
-                <span className="bill-label">Rate</span>
-                <span className="bill-value">₹{WATER_RATE}/L</span>
-              </div>
-              <div className="bill-item">
-                <span className="bill-label">Power Cost</span>
-                <span className="bill-value">₹{(powerConsumption * POWER_RATE / 60).toFixed(4)}/min</span>
-              </div>
-            </div>
-            <button 
-              className="reset-btn"
-              onClick={() => {
-                setCurrentBill(0);
-                setTotalUsage(0);
-              }}
-            >
-              Reset Billing
-            </button>
+        {/* System Status */}
+        <section className="glass-panel system-status">
+          <h2 className="section-title">System Status</h2>
+          <div className="status-grid">
+            <StatusIndicator 
+              label="Leakage Detection"
+              status={!leakageDetected}
+              activeText="NO LEAKS DETECTED"
+              inactiveText="LEAK DETECTED!"
+            />
+            <StatusIndicator 
+              label="Sensor Activity"
+              status={sensorsActive}
+              activeText="SENSORS ACTIVE"
+              inactiveText="SENSORS OFFLINE"
+            />
           </div>
         </section>
 
-        {/* Usage Analytics */}
-        <section className="glass-panel analytics-section">
-          <h2 className="section-title">Usage Analytics</h2>
-          <div className="analytics-grid">
-            <CircularGauge 
-              value={waterFlow}
-              max={50}
-              label="Flow Rate"
-              unit="L/min"
-              color="#4ecdc4"
-            />
-            <CircularGauge 
-              value={tankLevel}
-              max={100}
-              label="Tank Level"
-              unit="%"
-              color="#45b7d1"
-            />
-            <CircularGauge 
-              value={totalUsage % 100}
-              max={100}
-              label="Daily Usage"
-              unit="L"
-              color="#96ceb4"
-            />
-          </div>
+        {/* Watering Control */}
+        <section className="glass-panel watering-section">
+          <WateringControl />
         </section>
       </main>
 
       {/* Footer */}
       <footer className="app-footer">
         <div className="footer-content">
-          <span>AquaFlow System v2.0</span>
+          <span>AquaFlow Management System v3.0</span>
           <span className="pulse-dot"></span>
-          <span>Real-time Monitoring Active</span>
+          <span>Multi-Tank Monitoring Active</span>
         </div>
       </footer>
     </div>
