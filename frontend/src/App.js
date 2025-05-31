@@ -20,9 +20,9 @@ const WaterBillingSystem = () => {
     house4: { dailyUsage: 0, monthlyUsage: 160, currentBill: 0, flowRate: 0 }
   });
   
-  // System status
-  const [leakageDetected, setLeakageDetected] = useState(false);
-  const [sensorsActive, setSensorsActive] = useState(true);
+  // System status - One sensor active (green), one inactive (red)
+  const [leakageDetected, setLeakageDetected] = useState(false); // No leakage = green
+  const [sensorsActive, setSensorsActive] = useState(false); // Sensors offline = red
   const [wateringMode, setWateringMode] = useState('auto'); // 'on', 'off', 'auto'
   
   // Constants
