@@ -716,33 +716,20 @@ body {
   letter-spacing: 1px;
 }
 
-/* Watering Control - Centered */
-.watering-section {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  max-width: 500px;
-  margin: 0 auto;
-}
-
-.watering-control {
-  text-align: center;
-  width: 100%;
-}
-
-.control-title {
-  font-size: 1.2rem;
-  color: var(--primary-blue);
-  margin-bottom: 20px;
-  font-weight: 600;
-}
-
-.control-buttons {
+/* Watering Control Inline Styles */
+.watering-control-inline .control-buttons {
   display: flex;
   justify-content: center;
   gap: 15px;
   margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.watering-control-inline .control-status {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
 }
 
 .control-btn {
