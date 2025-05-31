@@ -595,15 +595,21 @@ body {
   color: var(--text-secondary);
 }
 
-/* System Status */
-.system-status {
-  grid-column: span 1;
+/* System Status - Centered */
+.sensor-status {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  max-width: 600px;
+  margin: 0 auto;
 }
 
 .status-grid {
   display: flex;
-  flex-direction: column;
-  gap: 25px;
+  justify-content: center;
+  gap: 60px;
+  flex-wrap: wrap;
 }
 
 .status-indicator-panel {
