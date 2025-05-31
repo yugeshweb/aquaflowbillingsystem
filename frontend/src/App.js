@@ -375,28 +375,49 @@ const WaterBillingSystem = () => {
           </div>
         </section>
 
-        {/* System Status */}
-        <section className="glass-panel sensor-status">
-          <h2 className="section-title">Sensor Status</h2>
-          <div className="status-grid">
-            <StatusIndicator 
-              label="Leakage Detection"
-              status={!leakageDetected}
-              activeText="NO LEAKS DETECTED"
-              inactiveText="LEAK DETECTED!"
-            />
-            <StatusIndicator 
-              label="Sensor Activity"
-              status={sensorsActive}
-              activeText="SENSORS ACTIVE"
-              inactiveText="SENSORS OFFLINE"
-            />
+        {/* Sensor Status and Watering Control - Same Row */}
+        <section className="glass-panel controls-row">
+          <div className="controls-container">
+            <div className="sensor-status-inline">
+              <h3 className="control-section-title">Sensor Status</h3>
+              <div className="status-grid-inline">
+                <StatusIndicator 
+                  label="Leakage Detection"
+                  status={!leakageDetected}
+                  activeText="NO LEAKS DETECTED"
+                  inactiveText="LEAK DETECTED!"
+                />
+                <StatusIndicator 
+                  label="Sensor Activity"
+                  status={sensorsActive}
+                  activeText="SENSORS ACTIVE"
+                  inactiveText="SENSORS OFFLINE"
+                />
+              </div>
+            </div>
+            
+            <div className="watering-control-inline">
+              <h3 className="control-section-title">Watering System</h3>
+              <div className="control-buttons">
+                {['on', 'off', 'auto'].map(mode => (
+                  <button
+                    key={mode}
+                    className={`control-btn ${wateringMode === mode ? 'active' : ''}`}
+                    onClick={() => setWateringMode(mode)}
+                  >
+                    <span className="btn-text">{mode.toUpperCase()}</span>
+                    {wateringMode === mode && <div className="btn-glow"></div>}
+                  </button>
+                ))}
+              </div>
+              <div className="control-status">
+                <span className="status-label">Current Mode:</span>
+                <span className={`status-value mode-${wateringMode}`}>
+                  {wateringMode.toUpperCase()}
+                </span>
+              </div>
+            </div>
           </div>
-        </section>
-
-        {/* Watering Control */}
-        <section className="glass-panel watering-section">
-          <WateringControl />
         </section>
       </main>
 
