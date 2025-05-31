@@ -514,14 +514,15 @@ body {
   color: var(--primary-blue);
 }
 
-/* Enhanced Power Section - Centered and Below Houses */
+/* Enhanced Power Section - Match Houses Width */
 .power-section-enhanced {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  max-width: 600px;
+  max-width: 1000px;
   margin: 0 auto;
+  width: 100%;
 }
 
 .power-display {
