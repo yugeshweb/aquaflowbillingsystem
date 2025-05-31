@@ -12,12 +12,11 @@ const WaterBillingSystem = () => {
   const [pumpToUnderground, setPumpToUnderground] = useState(false);
   const [pumpToOverhead, setPumpToOverhead] = useState(false);
   
-  // House consumption data
+  // House consumption data (3 houses)
   const [houseData, setHouseData] = useState({
     house1: { dailyUsage: 0, monthlyUsage: 180, currentBill: 0, flowRate: 0 },
     house2: { dailyUsage: 0, monthlyUsage: 220, currentBill: 0, flowRate: 0 },
-    house3: { dailyUsage: 0, monthlyUsage: 195, currentBill: 0, flowRate: 0 },
-    house4: { dailyUsage: 0, monthlyUsage: 160, currentBill: 0, flowRate: 0 }
+    house3: { dailyUsage: 0, monthlyUsage: 195, currentBill: 0, flowRate: 0 }
   });
   
   // System status - One sensor active (green), one inactive (red)
