@@ -377,8 +377,8 @@ const WaterBillingSystem = () => {
         </section>
 
         {/* System Status */}
-        <section className="glass-panel system-status">
-          <h2 className="section-title">System Status</h2>
+        <section className="glass-panel sensor-status">
+          <h2 className="section-title">Sensor Status</h2>
           <div className="status-grid">
             <StatusIndicator 
               label="Leakage Detection"
