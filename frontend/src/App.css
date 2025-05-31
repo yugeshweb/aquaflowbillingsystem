@@ -487,11 +487,14 @@ body {
 
 .houses-summary {
   display: flex;
-  justify-content: space-around;
+  justify-content: center;
+  gap: 40px;
   padding: 20px;
   background: rgba(0, 0, 0, 0.2);
   border-radius: 15px;
   border: 1px solid rgba(255, 255, 255, 0.08);
+  max-width: 800px;
+  flex-wrap: wrap;
 }
 
 .summary-item {
