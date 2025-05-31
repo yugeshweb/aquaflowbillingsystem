@@ -778,12 +778,6 @@ body {
   50% { opacity: 0.3; }
 }
 
-.control-status {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 10px;
-}
 
 .status-value {
   font-weight: bold;
