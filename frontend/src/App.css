@@ -178,21 +178,25 @@ body {
 /* Enhanced Dashboard Grid */
 .dashboard.enhanced {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  grid-template-columns: 1fr;
   gap: 25px;
-  max-width: 1600px;
+  max-width: 1200px;
   margin: 0 auto;
 }
 
-/* Tank Systems */
+/* Tank Systems - Centered */
 .tank-systems {
-  grid-column: span 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }
 
 .tanks-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 30px;
+  display: flex;
+  justify-content: center;
+  gap: 50px;
+  max-width: 800px;
 }
 
 .tank-container {
