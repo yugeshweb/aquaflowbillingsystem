@@ -514,7 +514,7 @@ body {
   color: var(--primary-blue);
 }
 
-/* Enhanced Power Section - Match Houses Width */
+/* Enhanced Power Section - Match Houses Width Exactly */
 .power-section-enhanced {
   display: flex;
   flex-direction: column;
@@ -527,9 +527,11 @@ body {
 
 .power-display {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: center;
-  gap: 20px;
+  justify-content: center;
+  gap: 40px;
+  width: 100%;
 }
 
 .power-gauge-large {
