@@ -596,21 +596,46 @@ body {
   color: var(--text-secondary);
 }
 
-/* System Status - Centered */
-.sensor-status {
+/* Combined Controls Row - Sensor Status and Watering */
+.controls-row {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  max-width: 600px;
+  max-width: 1000px;
   margin: 0 auto;
+  width: 100%;
 }
 
-.status-grid {
+.controls-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 40px;
+  width: 100%;
+  max-width: 800px;
+}
+
+.sensor-status-inline,
+.watering-control-inline {
   display: flex;
+  flex-direction: column;
+  align-items: center;
   justify-content: center;
-  gap: 60px;
-  flex-wrap: wrap;
+  text-align: center;
+}
+
+.control-section-title {
+  font-size: 1.2rem;
+  color: var(--primary-blue);
+  margin-bottom: 20px;
+  font-weight: 600;
+}
+
+.status-grid-inline {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  align-items: center;
 }
 
 .status-indicator-panel {
